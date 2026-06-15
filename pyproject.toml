@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "duelmesh"
+version = "0.1.0"
+description = "Offline two-player ASCII duel game over Meshtastic LoRa or local mock transport."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "pypubsub>=4.0.3",
+]
+
+[project.optional-dependencies]
+lora = [
+  "meshtastic[cli]>=2.5.0",
+]
+test = [
+  "pytest>=8.0.0",
+]
+
+[project.scripts]
+duelmesh = "duelmesh.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

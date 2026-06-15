@@ -1,0 +1,4 @@
+pypubsub>=4.0.3
+pytest>=8.0.0
+# Optional for real LoRa hardware:
+# meshtastic[cli]>=2.5.0

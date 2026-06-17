@@ -2,7 +2,7 @@
 
 DuelMesh is a two-player terminal duel game for Meshtastic LoRa nodes. It runs peer-to-peer: no server, no cloud, no internet, and no referee node.
 
-Original idea by `u/noakmilo`. Created together with ChatGPT Codex.
+Original idea by [`u/noakmilo`](https://www.reddit.com/user/noakmilo/). Created together with ChatGPT Codex.
 
 Each player connects one Meshtastic device, starts the CLI, joins the `DuelMesh` channel, opens or joins a game, rolls initiative, and fights with commit-reveal turns.
 

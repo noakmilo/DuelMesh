@@ -1,5 +1,7 @@
 # DuelMesh 🤺⚔️
 
+![DuelMesh screenshot](https://i.ibb.co/JR68wZqV/duelmesh.png)
+
 DuelMesh is a two-player terminal duel game for Meshtastic LoRa nodes. It runs peer-to-peer: no server, no cloud, no internet, and no referee node.
 
 Original idea by [`u/noakmilo`](https://www.reddit.com/user/noakmilo/). Created together with ChatGPT Codex.

@@ -1,4 +1,4 @@
-# DuelMesh
+# DuelMesh 🤺⚔️
 
 DuelMesh is a two-player terminal duel game for Meshtastic LoRa nodes. It runs peer-to-peer: no server, no cloud, no internet, and no referee node.
 

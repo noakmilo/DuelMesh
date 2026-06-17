@@ -1,0 +1,2 @@
+[console_scripts]
+duelmesh = duelmesh.cli:main

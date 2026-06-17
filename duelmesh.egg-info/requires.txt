@@ -1,0 +1,7 @@
+pypubsub>=4.0.3
+
+[lora]
+meshtastic[cli]>=2.5.0
+
+[test]
+pytest>=8.0.0

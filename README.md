@@ -1,177 +1,189 @@
 # DuelMesh
 
-DuelMesh is a two-player terminal duel game for Meshtastic LoRa meshes. It works peer-to-peer: no server, no internet, no cloud service, and no third referee node.
+DuelMesh is a two-player terminal duel game for Meshtastic LoRa nodes. It runs peer-to-peer: no server, no cloud, no internet, and no referee node.
 
-Two players clone the repo, connect one Meshtastic node each, join the same mesh/channel, and play from the terminal.
+Each player connects one Meshtastic device, starts the CLI, joins the `DuelMesh` channel, opens or joins a game, rolls initiative, and fights with commit-reveal turns.
 
-## What You Need
+## Requirements
 
 - Python 3.10+
-- Two Meshtastic-compatible LoRa devices, for example two Heltec V3 boards
-- Both devices flashed with Meshtastic firmware
-- Both devices configured for the same LoRa region and same primary channel
-- A USB cable for each device if both players are testing from laptops
+- Two Meshtastic-compatible devices, such as Heltec V3 boards
+- Meshtastic firmware installed on both devices
+- Both devices using the same LoRa region and compatible primary mesh settings
+- Bluetooth LE or USB serial access from the computer
+
+DuelMesh creates or reuses a secondary Meshtastic channel named `DuelMesh`. It does not use the primary channel for game traffic.
 
 ## Install
 
-Clone the repo:
-
 ```bash
-git clone https://github.com/YOUR_USER/DuelMesh.git
-cd DuelMesh
-```
-
-Create a virtual environment:
-
-```bash
+git clone https://github.com/noakmilo/duelmesh.git
+cd duelmesh
 python3 -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e .
 ```
 
-Install DuelMesh for Meshtastic hardware:
+Run the client:
 
 ```bash
-pip install -e ".[lora]"
+duelmesh
 ```
 
-For development and tests:
+Without activating the virtualenv:
 
 ```bash
-pip install -e ".[test,lora]"
-pytest
+.venv/bin/duelmesh
 ```
 
-## Verify The Meshtastic Devices
+## Startup Menu
 
-Find the serial ports.
+When you run `duelmesh`, choose how to connect:
 
-macOS:
-
-```bash
-ls /dev/cu.*
+```text
+Connection:
+1) Bluetooth LE Meshtastic
+2) USB serial Meshtastic
+3) Local mock test
 ```
 
-Linux:
+### Bluetooth LE
 
-```bash
-ls /dev/ttyUSB* /dev/ttyACM*
+DuelMesh scans nearby Meshtastic BLE devices and lets you select one by number.
+
+```text
+BLE devices:
+1) Meshtastic_c95c (...)
+2) Meshtastic_7928 (...)
+m) Type manually
 ```
 
-Windows uses ports such as `COM4`.
+### USB Serial
 
-Check each device:
+DuelMesh lists serial ports such as:
 
-```bash
-meshtastic --port /dev/cu.YOUR_DEVICE --info
+```text
+/dev/cu.*
+/dev/ttyUSB*
+/dev/ttyACM*
+COM4
 ```
 
-Send a plain Meshtastic test message before testing DuelMesh:
+### Local Mock Test
 
-Terminal A:
+Use this to test two clients on one computer without LoRa hardware. Open two terminals and run `duelmesh` in both, then choose `Local mock test` with different nicknames.
 
-```bash
-meshtastic --port /dev/cu.HELTEC_A --sendtext "hello from A"
+## DuelMesh Channel
+
+DuelMesh uses a secondary Meshtastic channel named:
+
+```text
+DuelMesh
 ```
 
-Terminal B:
+On startup:
 
-```bash
-meshtastic --port /dev/cu.HELTEC_B --listen
+- If the `DuelMesh` channel exists, DuelMesh reuses it.
+- If it exists with the wrong PSK, DuelMesh updates it.
+- If it does not exist, DuelMesh creates it in a free secondary slot.
+- Channel index `0`, the primary channel, is rejected for real LoRa play.
+
+The title screen shows the active channel:
+
+```text
+Channel: #DuelMesh
 ```
 
-If this does not work, fix Meshtastic first: region, channel, firmware, antenna, distance, or serial port.
+## Basic Game Flow
 
-## Start A Real LoRa Duel
-
-Player A:
-
-```bash
-duelmesh --transport lora --port /dev/cu.HELTEC_A --nick Alice --data-dir .duelmesh/alice-lora
-```
-
-Player B:
-
-```bash
-duelmesh --transport lora --port /dev/cu.HELTEC_B --nick Bob --data-dir .duelmesh/bob-lora
-```
-
-Bluetooth LE is also supported if your Meshtastic Python install and OS BLE stack can connect to the device:
-
-```bash
-duelmesh --transport lora --ble "DEVICE_NAME_OR_ADDRESS" --nick Alice --data-dir .duelmesh/alice-ble
-```
-
-Use either `--port` or `--ble`, not both. USB serial is recommended for first tests because it is easier to debug.
-
-Player A opens a game:
+Player 1 opens a game:
 
 ```text
 /open
 ```
 
-Player B lists games and joins:
+Player 2 lists games and joins by number:
 
 ```text
 /games
-/join GAME_ID
+/join 1
 ```
 
-Both players roll:
+Both players roll initiative:
 
 ```text
 /roll
 ```
 
-If the dice draw, both players use `/roll` again. When there is a winner, DuelMesh automatically opens the ATK/DEF selector for the player with initiative.
+The player with initiative chooses ATK/DEF first. The other player then chooses ATK/DEF. DuelMesh resolves the round automatically.
 
-## Local Test Without LoRa
-
-You can test two players on one machine with the mock mesh.
-
-Terminal A:
-
-```bash
-duelmesh --transport mock --nick Alice
-```
-
-Terminal B:
-
-```bash
-duelmesh --transport mock --nick Bob
-```
-
-Then use the same flow:
-
-```text
-/open
-/games
-/join GAME_ID
-/roll
-```
-
-In mock mode, different `--nick` values automatically create separate local profiles. Both clients share `.duelmesh/mockmesh` as the simulated radio bus.
+After `VICTORY`, `DEFEAT`, or `DRAW`, DuelMesh returns to the main menu.
 
 ## Commands
 
 ```text
 /open              Create public duel offer
-/games             List open games heard on the mesh
-/join GAME_ID      Join an open game
+/games             List open games with numbers
+/nodes             List known mesh nodes
+/join GAME_ID|N    Join an open game by ID or number
 /status            Show profile, HP, round, and connection
 /roll              Roll a d6 for first initiative
 /reveal            Send current reveal again if needed
 /cancel            Cancel open or active duel
+/clear-history     Clear local DuelMesh message history
 /nick NEWNAME      Change nickname
 /profile           Show local profile and record
 /help              Show commands
 /quit              Save and exit
 ```
 
-If you have an open game and run `/join GAME_ID`, DuelMesh warns that your open game will be removed from the mesh lobby. Confirming with `y` closes your offer first, then sends the join request.
+### `/games`
 
-## Duel Rules
+Shows open games heard on the `DuelMesh` channel:
 
-Each player has 10 HP and three target zones:
+```text
+1) 9D6Z Player2 !02eac95c Waiting
+```
+
+Join with:
+
+```text
+/join 1
+```
+
+or:
+
+```text
+/join 9D6Z
+```
+
+### `/nodes`
+
+Shows Meshtastic nodes known by the connected radio.
+
+### `/clear-history`
+
+Clears DuelMesh local message cache and heard games. It does not reset the Meshtastic node database, firmware, profile, wins, losses, or channel settings.
+
+It is blocked during an active duel or while you have an open game.
+
+## Combat System
+
+Each player starts with:
+
+```text
+10 HP
+```
+
+Each round, both players choose:
+
+```text
+ATK = target to attack
+DEF = target to defend
+```
+
+Targets:
 
 ```text
 1 Head  = 2 damage
@@ -179,124 +191,136 @@ Each player has 10 HP and three target zones:
 3 Legs  = 0.5 damage
 ```
 
-Each round both players choose:
-
-```text
-ATK: target to attack
-DEF: target to defend
-```
-
 If your DEF matches the opponent's ATK, you block that attack. Otherwise you take the target damage.
 
 Example:
 
 ```text
-Alice: ATK Head, DEF Head
-Bob:   ATK Body, DEF Body
+Alice: ATK Head, DEF Body
+Bob:   ATK Body, DEF Legs
 ```
 
 Result:
 
 ```text
-Alice hits Bob's Head: Bob takes 2
-Bob hits Alice's Body: Alice takes 1
+Alice blocks Bob's Body attack.
+Bob does not block Head.
+Bob takes 2 damage.
 ```
 
 Both players can take damage in the same round.
 
-## Anti-Cheat Model
+## Commit-Reveal
 
-DuelMesh has no third server node. Both clients calculate the same deterministic result.
+DuelMesh uses commit-reveal so the second player cannot copy the first player's choice.
 
-Before dueling, clients compare:
+Round flow:
 
 ```text
-ruleset
-rules_hash
+1. Player with initiative picks ATK/DEF.
+2. DuelMesh sends a commit hash, not the real ATK/DEF.
+3. Other player picks ATK/DEF.
+4. Both clients reveal ATK/DEF/salt.
+5. Each client verifies the reveal against the earlier commit.
+6. Both clients calculate the same result locally.
 ```
 
-Each turn uses commit-reveal:
+Commit:
 
 ```text
 commit = SHA256(round + atk + def + salt)
 ```
 
-Flow:
-
-```text
-1. Player with initiative commits ATK/DEF.
-2. Other player commits ATK/DEF.
-3. Both clients reveal ATK/DEF/salt.
-4. Both clients verify commits.
-5. Both clients calculate damage locally.
-```
-
-At the end, the duel history can be replayed. If the replay does not match, DuelMesh prints:
+If a reveal does not match the commit, DuelMesh prints:
 
 ```text
 CHEATING OR CLIENT MISMATCH DETECTED
 ```
 
-Without a server, a malicious modified client cannot be prevented absolutely, but mismatches are detectable with rules hashes, commit-reveal, and replay verification.
+## Packet Sizes
 
-## Packet Types
+DuelMesh sends compact JSON text over Meshtastic on the `DuelMesh` channel.
 
-DuelMesh sends compact JSON text packets over Meshtastic:
+Current measured packet sizes:
 
 ```text
-offer       advertise open game
-close       remove an open lobby offer
-join        request to join
-accept      accept join
-roll        d6 initiative roll
-commit      committed ATK/DEF hash
-reveal      revealed ATK/DEF/salt
-cancel      cancel game
-forfeit     surrender when closing active CLI
+offer   148 bytes
+roll     92 bytes
+commit  125 bytes
+reveal  102 bytes
 ```
 
-Lobby packets use the primary Meshtastic channel. Duel packets are sent directly to the opponent node ID after pairing.
+The most important game packets are `commit` and `reveal`.
+
+Example `commit` packet:
+
+```json
+{"a":"dm","d":{"c":"a1f3d12b69884a66785ac5aa8982039c","h":"9142cba06ff03955","r":1},"g":"8BDC","s":"!02eac95c","t":"c","v":1}
+```
+
+Example `reveal` packet:
+
+```json
+{"a":"dm","d":{"a":"h","d":"b","r":1,"s":"a9f3c17b91e4d022"},"g":"8BDC","s":"!02eac95c","t":"v","v":1}
+```
+
+Target codes:
+
+```text
+h = head
+b = body
+l = legs
+```
+
+Packet type codes:
+
+```text
+o = offer
+j = join
+a = accept
+r = roll
+c = commit
+v = reveal
+x = close
+k = cancel
+f = forfeit
+```
 
 ## Troubleshooting
 
 No games appear in `/games`:
 
-- Confirm both devices are on the same Meshtastic primary channel.
+- Wait a few seconds after `/open`.
+- Confirm both clients show `Channel: #DuelMesh`.
+- Restart both clients so DuelMesh can create/update the channel.
+- Restart both radios if the channel was just created.
+- Keep the radios separated by 1-3 meters; directly touching radios can perform badly.
 - Confirm both devices use the same LoRa region.
-- Test with `meshtastic --sendtext` and `meshtastic --listen`.
-- Keep both antennas connected before powering the radios.
-- Use `/open` again; lobby offers expire if not reannounced.
 
-Only my own game appears in mock mode:
+The duel gets stuck:
 
-- Use different nicknames:
+- Wait; DuelMesh resends critical reveal packets conservatively.
+- Use `/status` on both clients.
+- Use `/reveal` if both already committed and one reveal was missed.
+- Use `/cancel` if one node went offline.
+
+Bluetooth is unreliable:
+
+- Try USB serial for testing.
+- Verify the node with:
 
 ```bash
-duelmesh --transport mock --nick Alice
-duelmesh --transport mock --nick Bob
+meshtastic --ble "DEVICE_NAME" --info
 ```
 
-Hardware serial port is wrong:
+USB port is unknown:
 
-- Use `meshtastic --port PORT --info` until you find the correct port.
-- On macOS, Heltec boards usually appear under `/dev/cu.*`.
+```bash
+ls /dev/cu.*
+```
 
-Bluetooth does not connect:
+Then test:
 
-- First test with the Meshtastic CLI using `meshtastic --ble "DEVICE_NAME_OR_ADDRESS" --info`.
-- Pair/trust the device in your OS Bluetooth settings if your platform requires it.
-- Fall back to USB serial for the first DuelMesh test.
-
-The duel gets stuck after a packet loss:
-
-- Use `/status` on both clients.
-- Use `/reveal` if both already committed but one reveal was missed.
-- Use `/cancel` and start a new duel if one device went offline.
-
-## Notes For Heltec V3
-
-- Flash both boards with current Meshtastic firmware for Heltec V3.
-- Configure the correct regional frequency for your country.
-- Use the same channel URL or QR configuration on both devices.
-- Keep antennas attached.
-- For close-range desk testing, do not place both radios directly touching each other; a little separation is healthier for reception.
+```bash
+meshtastic --port /dev/cu.YOUR_DEVICE --info
+```

@@ -1,4 +1,4 @@
-from duelmesh.ascii_ui import fight_hud, hp_bar, percent_bar, target_from_menu
+from duelmesh.ascii_ui import fight_hud, hp_bar, percent_bar, target_from_menu, title
 from duelmesh.game import DuelState, PlayerState
 
 
@@ -25,3 +25,7 @@ def test_target_from_menu() -> None:
     assert target_from_menu("1") == "head"
     assert target_from_menu("2") == "body"
     assert target_from_menu("3") == "legs"
+
+
+def test_title_shows_channel() -> None:
+    assert "Channel: #DuelMesh" in title("DuelMesh")

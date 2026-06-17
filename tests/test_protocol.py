@@ -15,6 +15,12 @@ def test_packet_roundtrip_compact_json() -> None:
     assert decoded.d == {"rules": RULESET_ID, "rh": rules_hash()}
 
 
+@pytest.mark.parametrize("raw", ["hello mesh", "", "[]", "42"])
+def test_non_duelmesh_text_is_protocol_error(raw: str) -> None:
+    with pytest.raises(ProtocolError):
+        decode_packet(raw)
+
+
 @pytest.mark.parametrize("nick", ["Camilo Noa", "🔥Ham🔥", "VeryLongNickname12345", "ADMIN"])
 def test_invalid_nicks_rejected(nick: str) -> None:
     with pytest.raises(ProtocolError):

@@ -32,6 +32,7 @@ HELP = """Commands:
 /clear-history     Clear local DuelMesh message history
 /nick NEWNAME      Change nickname
 /profile           Show local profile
+/credits           Show project credits
 /help              Show commands
 /quit              Save and exit
 """
@@ -636,6 +637,8 @@ def run_command(session: Session, command: str) -> bool:
                 print(f"Nickname changed to {session.profile.nickname}.")
         elif cmd == "/profile":
             print(ascii_ui.profile_screen(session.profile))
+        elif cmd == "/credits":
+            print(ascii_ui.credits_screen())
         elif cmd == "/help":
             print(HELP)
         elif cmd == "/quit":

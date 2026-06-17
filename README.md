@@ -2,6 +2,8 @@
 
 DuelMesh is a two-player terminal duel game for Meshtastic LoRa nodes. It runs peer-to-peer: no server, no cloud, no internet, and no referee node.
 
+Original idea by `u/noakmilo`. Created together with ChatGPT Codex.
+
 Each player connects one Meshtastic device, starts the CLI, joins the `DuelMesh` channel, opens or joins a game, rolls initiative, and fights with commit-reveal turns.
 
 ## Requirements
@@ -134,6 +136,7 @@ After `VICTORY`, `DEFEAT`, or `DRAW`, DuelMesh returns to the main menu.
 /clear-history     Clear local DuelMesh message history
 /nick NEWNAME      Change nickname
 /profile           Show local profile and record
+/credits           Show project credits
 /help              Show commands
 /quit              Save and exit
 ```
@@ -167,6 +170,10 @@ Shows Meshtastic nodes known by the connected radio.
 Clears DuelMesh local message cache and heard games. It does not reset the Meshtastic node database, firmware, profile, wins, losses, or channel settings.
 
 It is blocked during an active duel or while you have an open game.
+
+### `/credits`
+
+Shows the original idea credit, Codex collaboration credit, and the main technologies used by DuelMesh.
 
 ## Combat System
 

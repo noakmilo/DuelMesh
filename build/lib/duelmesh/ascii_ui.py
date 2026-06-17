@@ -23,8 +23,26 @@ def title(channel: str = "") -> str:
         "║               / \\                            / \\                     ║\n"
         "║                                                                      ║\n"
         "║                         LoRa Mesh PvP                                ║\n"
+        "║                       by u/noakmilo + Codex                          ║\n"
         f"║ {channel_label:^68} ║\n"
         "╚══════════════════════════════════════════════════════════════════════╝"
+    )
+
+
+def credits_screen() -> str:
+    return (
+        "DuelMesh Credits\n"
+        "\n"
+        "Original idea: u/noakmilo\n"
+        "Created together with ChatGPT Codex\n"
+        "\n"
+        "Technologies:\n"
+        "- Python\n"
+        "- Meshtastic\n"
+        "- LoRa\n"
+        "- Bluetooth LE\n"
+        "- Heltec V3 compatible hardware\n"
+        "- pytest"
     )
 
 

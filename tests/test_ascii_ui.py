@@ -1,4 +1,4 @@
-from duelmesh.ascii_ui import fight_hud, hp_bar, percent_bar, target_from_menu, title
+from duelmesh.ascii_ui import credits_screen, fight_hud, hp_bar, percent_bar, target_from_menu, title
 from duelmesh.game import DuelState, PlayerState
 
 
@@ -28,4 +28,13 @@ def test_target_from_menu() -> None:
 
 
 def test_title_shows_channel() -> None:
-    assert "Channel: #DuelMesh" in title("DuelMesh")
+    banner = title("DuelMesh")
+    assert "Channel: #DuelMesh" in banner
+    assert "by u/noakmilo + Codex" in banner
+
+
+def test_credits_screen() -> None:
+    credits = credits_screen()
+    assert "u/noakmilo" in credits
+    assert "ChatGPT Codex" in credits
+    assert "Meshtastic" in credits

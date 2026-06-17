@@ -148,6 +148,16 @@ def test_nodes_command_lists_known_mock_nodes(tmp_path, capsys) -> None:
     assert "1)" in out
 
 
+def test_credits_command(tmp_path, capsys) -> None:
+    alice = make_session("!a", "Alice", tmp_path)
+
+    run_command(alice, "/credits")
+
+    out = capsys.readouterr().out
+    assert "u/noakmilo" in out
+    assert "ChatGPT Codex" in out
+
+
 def test_clear_history_clears_lobby_cache_and_mock_bus(tmp_path) -> None:
     alice = make_session("!a", "Alice", tmp_path)
     bob = make_session("!b", "Bob", tmp_path)
